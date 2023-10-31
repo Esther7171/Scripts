@@ -1,3 +1,4 @@
+# Update && Full-Upgrade
 ```bash
 #!/bin/bash
 dog="sudo apt-get -y "
