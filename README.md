@@ -1,3 +1,10 @@
+C13z49vRyXAGQtZce4tYqzVdN72h5N
+sudo pro attach C13z49vRyXAGQtZce4tYqzVdN72h5N
+
+
+
+
+
 # Update && Full-Upgrade
 ```bash
 #!/bin/bash
