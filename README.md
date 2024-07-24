@@ -1,4 +1,4 @@
-# Update && Full-Upgrade
+# Debina Update Script
 ```bash
 #!/bin/bash
 clear
