@@ -1,4 +1,4 @@
-# I'm creating Scripts to automate my daily base task and adding some scripts here that help everone.
+# I'm creating Scripts to automate my daily base task adding some scripts here that help everone.
 
 # To make scripts as commands.
 ```
