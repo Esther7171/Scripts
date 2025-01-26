@@ -1,4 +1,4 @@
-## Folder Protection Script
+# Folder Protection Script
 
 This script helps you protect a folder on your Windows system by requiring a password to access it. You can change the password and modify the folder's visibility and permissions easily.
 
