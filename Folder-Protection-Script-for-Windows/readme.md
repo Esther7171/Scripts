@@ -9,6 +9,9 @@ This script helps you protect a folder on your Windows system by requiring a pas
 
 ### How to Use
 1. Download the script and save it to your system.
+```ps1
+curl -o FolderLock.ps1 https://raw.githubusercontent.com/Esther7171/Scripts/main/Folder-Protection-Script-for-Windows/FolderLock.ps1
+```
 2. Run the script in PowerShell.
 3. Enter the password when prompted:
    - Correct password will unhide the folder and set permissions to allow access.
