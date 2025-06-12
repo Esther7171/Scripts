@@ -91,5 +91,5 @@ After placing the file and editing the config, restart Cowrie:
 ./bin/cowrie stop
 ./bin/cowrie start
 ```
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/fff182d4-555e-4190-91e9-c78a7daf6074)
 
