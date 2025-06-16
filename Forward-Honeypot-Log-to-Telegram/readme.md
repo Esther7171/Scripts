@@ -93,3 +93,7 @@ After placing the file and editing the config, restart Cowrie:
 ```
 ![image](https://github.com/user-attachments/assets/fff182d4-555e-4190-91e9-c78a7daf6074)
 
+Add a rediection to port 22
+```
+sudo iptables -t nat -A PREROUTING -p tcp --dport 2222 -j REDIRECT --to-port 22
+```
