@@ -10,4 +10,3 @@ sudo mv <script> /usr/local/bin
 ```
 service
 ```
-
