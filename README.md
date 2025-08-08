@@ -5,7 +5,8 @@
 git clone https://github.com/Esther7171/Scripts
 cd Scripts
 sudo mv <script> /usr/local/bin
-````
+```
+
 <!--
 ```
 service
