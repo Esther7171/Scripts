@@ -15,3 +15,4 @@ service
 pyinstaller --noconfirm --onefile --windowed --icon=icon.ico --add-data "logo.png;." --manifest admin.manifest zerosync.py
 ```
 
+
