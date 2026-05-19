@@ -10,7 +10,7 @@ sudo apt install python3-docx -y
 If you already used pip (common mistake)
 You probably did:
 ```
-sudo pip3 install python-docx
+sudo pip3 install python-docx --break-system-packages
 ```
 
 Create script:
