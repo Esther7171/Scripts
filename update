@@ -1,106 +1,117 @@
 #!/bin/bash
+# Global update script - Debian/Ubuntu, Arch, RedHat/Fedora families
+# Usage: sudo ./update.sh          (spinner mode, quiet)
+# sudo ./update.sh -v      (verbose mode, full package manager output)
 
-fun_fun(){
-        clear
-    echo -e "\e[1;33m________________________________________\e[0m" #orange
+LOG="/tmp/update-script.log"
+: > "$LOG"
+
+VERBOSE=0
+[ "$1" = "-v" ] || [ "$1" = "--verbose" ] && VERBOSE=1
+
+banner() {
+    # $1 = color code, $2 = text
     echo ""
-    echo -e "\e[7;1;5;33m U P D A T I N G  I N  P R O G R E S S \e[0m" 
-    echo -e "\e[1;33m________________________________________\e[0m"
+    echo -e "\e[1;${1}m________________________________________________\e[0m"
     echo ""
-    sudo apt-get update -y
-    clear
-    echo -e "\e[1;31m________________________________________\e[0m" #red
+    echo -e "\e[7;1;${1}m ${2} \e[0m"
+    echo -e "\e[1;${1}m________________________________________________\e[0m"
     echo ""
-    echo -e "\e[7;1;5;31m U P G R A D E   I N   P R O G R E S S \e[0m"
-    echo -e "\e[1;31m________________________________________\e[0m"
-    sleep 0.5s
-    echo ""
-    sudo apt-get upgrade -y
-    clear
-    echo -e "\e[1;35m_____________________________________________________\e[0m" #purple
-    echo ""
-    echo -e "\e[7;1;5;35m D I S T R O - U P G R A D E   I N   P R O G R E S S \e[0m"
-    echo -e "\e[1;35m_____________________________________________________\e[0m"
-    sleep 0.5s
-    echo ""
-    sudo apt-get dist-upgrade -y
-    clear
-    echo -e "\e[1;34m_________________________________________________\e[0m"  #blue
-    echo ""
-    echo -e "\e[7;1;5;34m F U L L - U P G R A D E   I N   P R O G R E S S \e[0m"
-    echo -e "\e[1;34m_________________________________________________\e[0m"
-    echo ""
-    sleep 2s
-    sudo apt-get full-update -y
-    clear
-    echo -e "\e[1;32m_______________________________________\e[0m" #green
-    echo ""
-    echo -e "\e[7;1;5;32m C L E A N I N G  I N  P R O G R E S S \e[0m"
-    echo -e "\e[1;32m_______________________________________\e[0m"
-    sleep 0.5s
-    echo ""
-    sudo apt-get autoremove -y
-    clear
-    echo -e "\e[1;33m__________________________________________\e[0m"
-    echo ""
-    echo -e "\e[7;1;5;33m            A L L  D O N E            \e[0m"
-    echo -e "\e[1;33m___________________________________________\e[0m"
-    sleep 1s
-    clear
-    exit
 }
-check_disto=/etc/os-release
-if grep -q "Ubuntu" $check_disto || grep -q "Parrot" $check_disto || grep -q "kali" $check_disto || grep -q "debain" $check_disto || grep -q "Pop" $check_disto 
-then
-fun_fun
+
+fail() {
+    echo -e "\n\e[1;31m[ERROR]\e[0m $1"
+    echo -e "\e[1;31m--- last 15 log lines ($LOG) ---\e[0m"
+    tail -n 15 "$LOG"
+    exit 1
+}
+
+run() {
+    # run "description" command...
+    local desc="$1"; shift
+    if [ "$VERBOSE" -eq 1 ]; then
+        echo -e "\e[1;36m>>> $desc\e[0m"
+        "$@" 2>&1 | tee -a "$LOG"
+        return ${PIPESTATUS[0]}
+    fi
+    "$@" >> "$LOG" 2>&1 &
+    local pid=$!
+    local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    tput civis 2>/dev/null   # hide cursor
+    while kill -0 "$pid" 2>/dev/null; do
+        i=$(( (i+1) % ${#frames} ))
+        printf "\r\e[1;36m %s \e[0m%s   " "${frames:$i:1}" "$desc"
+        sleep 0.1
+    done
+    wait "$pid"
+    local rc=$?
+    tput cnorm 2>/dev/null   # restore cursor
+    if [ $rc -eq 0 ]; then
+        printf "\r\e[1;32m ✔ \e[0m%s      \n" "$desc"
+    else
+        printf "\r\e[1;31m ✖ \e[0m%s      \n" "$desc"
+    fi
+    return $rc
+}
+
+# ---- Require root (or sudo available) ----
+if [ "$EUID" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1; then
+        SUDO="sudo"
+        sudo -v || fail "sudo authentication failed."
+    else
+        fail "Run as root (sudo not found)."
+    fi
+else
+    SUDO=""
 fi
 
-if grep -q "Arch" $check_disto
-then
-# based on arch
-    clear
-    echo -e "\e[1;33m________________________________________\e[0m" #orange
-    echo ""
-    echo -e "\e[7;1;5;33m U P D A T I N G  I N  P R O G R E S S \e[0m" 
-    echo -e "\e[1;33m________________________________________\e[0m"
-    echo ""
-    sudo pacman -Syc -y
-    clear
-    exit
-fi
+# ---- Detect distro family ----
+[ -f /etc/os-release ] || fail "/etc/os-release not found - cannot detect distro."
+. /etc/os-release
+DISTRO="${ID,,} ${ID_LIKE,,}"
 
-if grep -q "Red hat" $check_disto || grep -q "Rpm" $check_disto || grep -q "Red-hat" $check_disto || grep -q "rpm" $check_disto || grep -q "red-hat" $check_disto
-then
-# based on rpm
-    clear
-    echo -e "\e[1;33m________________________________________\e[0m" #orange
-    echo ""
-    echo -e "\e[7;1;5;33m U P D A T I N G  I N  P R O G R E S S \e[0m" 
-    echo -e "\e[1;33m________________________________________\e[0m"
-    echo ""
-    sudo yum update -y
-    clear
-    echo -e "\e[1;31m________________________________________\e[0m" #red
-    echo ""
-    echo -e "\e[7;1;5;31m U P G R A D E   I N   P R O G R E S S \e[0m"
-    echo -e "\e[1;31m________________________________________\e[0m"
-    sleep 0.5s
-    echo ""
-    sudo yum upgrade -y
-    clear
-    echo -e "\e[1;32m_______________________________________\e[0m" #green
-    echo ""
-    echo -e "\e[7;1;5;32m C L E A N I N G  I N  P R O G R E S S \e[0m"
-    echo -e "\e[1;32m_______________________________________\e[0m"
-    sleep 0.5s
-    echo ""
-    sudo yum autoclean -y
-    clear
-    echo -e "\e[1;33m__________________________________________\e[0m"
-    echo ""
-    echo -e "\e[7;1;5;33m            A L L  D O N E            \e[0m"
-    echo -e "\e[1;33m___________________________________________\e[0m"
-    sleep 1s
-    clear
-    exit
+case "$DISTRO" in
+    *debian*|*ubuntu*)
+        banner 33 "S Y S T E M   U P D A T E   ( A P T )"
+        export DEBIAN_FRONTEND=noninteractive
+        run "Refreshing package lists"  $SUDO apt-get update -y        || fail "apt update failed"
+        run "Upgrading packages"        $SUDO apt-get upgrade -y       || fail "apt upgrade failed"
+        run "Full upgrade (dist)"       $SUDO apt-get dist-upgrade -y  || fail "dist-upgrade failed"
+        run "Removing unused packages"  $SUDO apt-get autoremove -y
+        run "Cleaning package cache"    $SUDO apt-get autoclean -y
+        ;;
+
+    *arch*|*manjaro*)
+        banner 33 "S Y S T E M   U P D A T E   ( P A C M A N )"
+        run "Syncing + upgrading"       $SUDO pacman -Syu --noconfirm  || fail "pacman upgrade failed"
+        run "Cleaning package cache"    $SUDO pacman -Sc --noconfirm
+        ORPHANS=$($SUDO pacman -Qtdq 2>/dev/null)
+        if [ -n "$ORPHANS" ]; then
+            run "Removing orphans"      $SUDO pacman -Rns --noconfirm $ORPHANS
+        fi
+        ;;
+
+    *rhel*|*fedora*|*centos*|*rocky*|*alma*)
+        if command -v dnf >/dev/null 2>&1; then PKG="dnf"; else PKG="yum"; fi
+        banner 33 "S Y S T E M   U P D A T E   ( ${PKG^^} )"
+        run "Upgrading packages"        $SUDO $PKG upgrade -y          || fail "$PKG upgrade failed"
+        run "Removing unused packages"  $SUDO $PKG autoremove -y
+        run "Cleaning caches"           $SUDO $PKG clean all
+        ;;
+
+    *)
+        fail "Unsupported distro: ID=$ID ID_LIKE=${ID_LIKE:-none}"
+        ;;
+esac
+
+banner 32 "A L L   D O N E"
+echo -e "Full log: \e[1m$LOG\e[0m"
+
+# ---- Reboot hint if kernel was updated ----
+if [ -f /var/run/reboot-required ]; then
+    echo -e "\e[1;33m[!] Reboot required to finish updates.\e[0m"
+elif command -v needs-restarting >/dev/null 2>&1 && ! needs-restarting -r >/dev/null 2>&1; then
+    echo -e "\e[1;33m[!] Reboot required to finish updates.\e[0m"
 fi
