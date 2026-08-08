@@ -26,8 +26,14 @@
 
 Save this file as:
 
+default location
 ```
 cowrie/src/cowrie/output/telegram.py
+```
+if u dont find it search it 
+
+```
+ find ~/cowrie -type d -name output 2>/dev/null
 ```
 
 ---
